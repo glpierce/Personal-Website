@@ -24,3 +24,15 @@ body {
     text-align: center;
     text-decoration: underline;
 }
+
+#favoriteSongs div {
+    text-align: center;
+}
+
+.leftSongs {
+    margin-right: 1%;
+}
+
+.rightSongs {
+    margin-left: 1%;
+}
