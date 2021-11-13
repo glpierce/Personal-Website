@@ -30,9 +30,13 @@ body {
 }
 
 .leftSongs {
+    margin-bottom: .5%;
+    margin-left: 1%;
     margin-right: 1%;
 }
 
 .rightSongs {
+    margin-bottom: .5%;
     margin-left: 1%;
+    margin-right: 1%;
 }
