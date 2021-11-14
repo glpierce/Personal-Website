@@ -53,3 +53,20 @@ body {
     width: auto;
     height: 250px;
 }
+
+#favoriteBooks div {
+    text-align: center;
+}
+
+#favoriteBooks div div {
+   display: inline-block;
+}
+
+#favoriteBooks div div img {
+    width: auto;
+    height: 250px;
+}
+
+#whereIveDriven div  {
+    text-align: center;
+}
