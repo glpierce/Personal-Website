@@ -1,3 +1,6 @@
+/**/
+/* Universal Title & Navigation */
+/**/
 body {
     background-color: #09143c;
 }
@@ -40,6 +43,9 @@ body {
     margin-left: 4%;
 }
 
+/**/
+/* About Grant */
+/**/
 #aboutGrant {
     width: 50%;
     margin: auto;
@@ -102,4 +108,12 @@ body {
 
 #whereIveDriven div  {
     text-align: center;
+}
+
+/**/
+/* Games & Calculators Placeholder */
+/**/
+.placeholder {
+    text-align: center;
+    color: white;
 }
