@@ -16,9 +16,30 @@
     <div id="quoteDisplay">
       <button onclick="newQuote()">New Quote</button>
     </div>
-    <br>
-    <br>
-    <h1 class="placeholder">Calculators coming soon!</h1>
+    <div id="brugesScore">
+      <form id="brugesScoreForm" action="./brugesScore.js" method="POST">
+        <h3>Bruges Score Calculator</h3>
+        <p class="inputHeader">Volume:</p>
+        <input type="text" id="volumeAmount" name="volumeAmount">
+        <input type="radio" id="volumeUnitMl" name="volumeUnit" value="mL">
+        <label for="volumeunitMl">mL</label>
+        <input type="radio" id="volumeUnitFloz" name="volumeUnit" value="fl oz">
+        <label for="volumeunitFloz">fl oz</label>
+        <br>
+        <p class="inputHeader">Alcohol Content:</p>
+        <input type="text" id="alcoholContent" name="alcoholContent">
+        <label for="alcoholContent">%</label>
+        <br>
+        <p class="inputHeader">Price:</p>
+        <input type="text" id="price" name="price">
+        <label for="price">USD</label>
+        <br>
+        <div id="buttonHolder">
+          <input id="brugesScoreSubmit" type="submit" value="Calculate">
+        </div>
+      </form>
+    </div>
     <script src="../script.js"></script>
+    <script src="../brugesScore.js"></script>
   </body>
 </html>
