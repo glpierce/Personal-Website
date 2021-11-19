@@ -20,17 +20,52 @@ function startGame() {
     /* Initializes variable controlling if the game has ended */
     let gameOver = false;
 
-    /* Score, lives & header initialization */
+    /* Score, lives, level & header initialization */
     const topMargin = 20;
     let score = 0;
     let lives = 3;
+    let level = 1;
 
     /* Assigns initial ball parameters */
     const ballRadius = 10;
     let x = canvas.width/2;
     let y = canvas.height-30;
-    let dx = 2;
-    let dy = -2;
+    let dx = assignDX();
+    let dy = assignDY();
+
+    function assignDX() {
+        switch (level) {
+            case 1:
+                return randomDirection(2);
+            case 2:
+                return randomDirection(2);
+            case 3:
+                return randomDirection(2);
+            case 4:
+                return randomDirection(3);
+        }
+    }
+
+    function assignDY() {
+        switch (level) {
+            case 1:
+                return 2;
+            case 2:
+                return 2;
+            case 3:
+                return 3;
+            case 4:
+                return 3;
+        }
+    }
+
+    function randomDirection(num) {
+        if (Math.random() < 0.5) {
+            return num * -1;
+        } else {
+            return num;
+        }
+    }
 
     /* Assigns initial paddle parameters */
     const paddleHeight = 10;
@@ -38,23 +73,73 @@ function startGame() {
     let paddleX = (canvas.width-paddleWidth) / 2;
     let rightPressed = false;
     let leftPressed = false;
-
+    
     /* Assigns initial brick parameters */
-    const brickRowCount = 6;
-    const brickColumnCount = 7;
+    let brickRowCount = getBrickRowCount();
+    let brickColumnCount = 7;
     const brickPadding = 5;
     const brickWidth = (canvas.width - ((brickColumnCount + 1) * brickPadding)) / brickColumnCount;
     const brickHeight = 20;
-    let bricks = generateBrickArray();
-    function generateBrickArray() {
-        let brickArray = []
+    let bricks = getBrickParameters();
+
+    function getBrickRowCount() {
+        if (level == 1){
+            return 2;
+        } else if (level == 2) {
+            return 2;
+        } else if (level == 3 || level == 4) {
+            return 5;
+        }
+    }
+    
+    function getBrickParameters() {
+        let brickParameters = [];
         for (c = 0; c < brickColumnCount; c++) {
-            brickArray[c] = [];
+            brickParameters[c] = [];
             for (r = 0; r < brickRowCount; r++) {
-                brickArray[c][r] = {x: 0, y: 0, status: 1};
+                brickParameters[c][r] = {x: getBrickX(c), y: getBrickY(r), status: getStatus(c, r)};
             }
         }
-        return brickArray
+        return brickParameters;
+    }
+
+    function getBrickX(c) {
+        return (c * (brickWidth + brickPadding) + brickPadding);
+    }
+
+    function getBrickY(r) {
+        return (r * (brickHeight + brickPadding) + brickPadding + topMargin);
+    }
+
+    function getStatus(c, r) {
+        switch (level) {
+            case 1:
+                return 1;
+            case 2:
+                if (r == 0) {
+                    return 2;
+                } else {
+                    return 1;
+                }
+            case 3:
+                if (r == 2) {
+                    return 3;
+                } else if (r == 1 || r == 3) {
+                    return 2;
+                } else {
+                    return 1;
+                }
+            case 4:
+                if (c == 3 || r == 0) {
+                    return 0;
+                } else if (r == 4 && c != 3) {
+                    return 3;
+                } else if (r == 3 && c != 3) {
+                    return 2;
+                } else {
+                    return 1;
+                }
+        }
     }
 
     /* Adds event listeners for left/right key press (paddle control) */
@@ -63,17 +148,17 @@ function startGame() {
 
     /* Defines event listener functions */
     function keyDownHandler(e) {
-        if (e.key == "Right" || e.key == "ArrowRight" || e.key == "D") {
+        if (e.key == "Right" || e.key == "ArrowRight" || e.key == "d") {
             rightPressed = true;
-        } else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "A") {
+        } else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") {
             leftPressed = true;
         }
     }
     function keyUpHandler(e) {
-        if( e.key == "Right" || e.key == "ArrowRight" || e.key == "D") {
+        if( e.key == "Right" || e.key == "ArrowRight" || e.key == "d") {
             rightPressed = false;
         }
-        else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "A") {
+        else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") {
             leftPressed = false;
         }
     }
@@ -99,7 +184,13 @@ function startGame() {
         ballMovement();
         paddleMovement();
         if (gameOver == false) {
-            requestAnimationFrame(playGame);
+            if (checkLevelComplete()) {
+                level = level + 1;
+                setUpLevelParameters();
+                requestAnimationFrame(playGame);
+            } else {
+                requestAnimationFrame(playGame);
+            }
         } else {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawScore();
@@ -158,18 +249,26 @@ function startGame() {
     function drawBricks() {
         for (c = 0; c < brickColumnCount; c++) {
             for (r = 0; r < brickRowCount; r++) {
-                if (bricks[c][r].status == 1) {
-                    let brickX = (c * (brickWidth + brickPadding) + brickPadding);
-                    let brickY = (r * (brickHeight + brickPadding) + brickPadding + topMargin);
-                    bricks[c][r].x = brickX;
-                    bricks[c][r].y = brickY;
+                if (bricks[c][r].status > 0) {
                     ctx.beginPath();
-                    ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                    ctx.fillStyle = "#0095DD";
+                    ctx.rect(bricks[c][r].x, bricks[c][r].y, brickWidth, brickHeight);
+                    ctx.fillStyle = getColor();
                     ctx.fill();
                     ctx.closePath();
                 }
             }
+        }
+    }
+
+    /* Assigns brick color */
+    function getColor() {
+        switch (bricks[c][r].status) {
+            case 1:
+                return "yellow";
+            case 2:
+                return "orange";
+            case 3:
+                return "red";
         }
     }
 
@@ -178,15 +277,15 @@ function startGame() {
         for (c = 0; c < brickColumnCount; c++) {
             for (r = 0; r < brickRowCount; r++) {
                 let b = bricks[c][r];
-                if( b.status == 1) {
+                if( b.status > 0) {
                     if (((y - ballRadius <= b.y + brickHeight && y + ballRadius > b.y + brickHeight) || (y + ballRadius >= b.y && y - ballRadius < b.y)) && (x >= b.x && x <= b.x + brickWidth)) {
                         dy = -dy;
-                        b.status = 0;
+                        b.status = b.status - 1;
                         score++;
                     }
                     if (((x - ballRadius <= b.x + brickWidth && x + ballRadius > b.x + brickWidth) || (x + ballRadius >= b.x && x - ballRadius < b.x)) && (y >= b.y && y <= b.y + brickHeight)) {
                         dx = -dx;
-                        b.status = 0;
+                        b.status = b.status - 1;
                         score++;
                     }
                 }
@@ -207,7 +306,7 @@ function startGame() {
                 } else {
                     x = canvas.width/2;
                     y = canvas.height-30;
-                    dx = 2;
+                    dx = assignDX();
                     dy = -2;
                     paddleX = (canvas.width-paddleWidth)/2;
                 }
@@ -235,6 +334,27 @@ function startGame() {
                 paddleX = 0;
             }
         }
+    }
+
+    function checkLevelComplete() {
+        for (c = 0; c < brickColumnCount; c++) {
+            for (r = 0; r < brickRowCount; r++) {
+                if (bricks[c][r].status > 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    function setUpLevelParameters() {
+        x = canvas.width/2;
+        y = canvas.height-30;
+        paddleX = (canvas.width-paddleWidth)/2
+        dx = assignDX();
+        dy = assignDY();
+        brickRowCount = getBrickRowCount();
+        bricks = getBrickParameters();
     }
     
     /* Creates the game over screen */
