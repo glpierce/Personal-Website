@@ -43,6 +43,8 @@ function startGame() {
                 return randomDirection(2);
             case 4:
                 return randomDirection(3);
+            case 5:
+                return randomDirection(3);
         }
     }
 
@@ -55,6 +57,8 @@ function startGame() {
             case 3:
                 return 3;
             case 4:
+                return 3;
+            case 5:
                 return 3;
         }
     }
@@ -69,7 +73,7 @@ function startGame() {
 
     /* Assigns initial paddle parameters */
     const paddleHeight = 10;
-    const paddleWidth = 75;
+    const paddleWidth = canvas.width; /*75*/
     let paddleX = (canvas.width-paddleWidth) / 2;
     let rightPressed = false;
     let leftPressed = false;
@@ -87,7 +91,7 @@ function startGame() {
             return 2;
         } else if (level == 2) {
             return 2;
-        } else if (level == 3 || level == 4) {
+        } else if (level == 3 || level == 4 || level == 5) {
             return 5;
         }
     }
@@ -139,6 +143,14 @@ function startGame() {
                 } else {
                     return 1;
                 }
+            case 5:
+                if (c == 3 || r == 0) {
+                    return 0;
+                } else if ((r == 4 || r == 3) && (c != 3)) {
+                    return 3;
+                } else {
+                    return 2;
+                }
         }
     }
 
@@ -177,7 +189,8 @@ function startGame() {
         drawBall();
         drawPaddle();
         drawScore();
-        drawLives()
+        drawLives();
+        drawLevel();
         drawTopBound();
         drawBricks();
         collisionDetection();
@@ -237,6 +250,13 @@ function startGame() {
         ctx.closePath();
     }
 
+    function drawLevel() {
+        ctx.beginPath();
+        ctx.font = "bold 16px Arial";
+        ctx.fillStyle = "black";
+        ctx.fillText("Level " + level, (canvas.width / 2) - 27, 15);
+    }
+
     /* Draws the top boundary line on canvas */
     function drawTopBound() {
         ctx.beginPath();
@@ -280,11 +300,15 @@ function startGame() {
                 if( b.status > 0) {
                     if (((y - ballRadius <= b.y + brickHeight && y + ballRadius > b.y + brickHeight) || (y + ballRadius >= b.y && y - ballRadius < b.y)) && (x >= b.x && x <= b.x + brickWidth)) {
                         dy = -dy;
+                        y = y + dy;
+                        x = x + dx;
                         b.status = b.status - 1;
                         score++;
                     }
                     if (((x - ballRadius <= b.x + brickWidth && x + ballRadius > b.x + brickWidth) || (x + ballRadius >= b.x && x - ballRadius < b.x)) && (y >= b.y && y <= b.y + brickHeight)) {
                         dx = -dx;
+                        x = x + dx;
+                        y = y + dy;
                         b.status = b.status - 1;
                         score++;
                     }
