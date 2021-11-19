@@ -180,7 +180,7 @@ body {
 /**/
 #brickSmasher {
     width: 600px;
-    height: 600px;
+    height: 650px;
     margin: auto;
     margin-top: 40px;
     align-items: center;
@@ -192,6 +192,25 @@ body {
     background-color: white;
     border-radius: 10px;
     text-align: center;
+}
+
+#startScreenContainer {
+    display: inline-block;
+    width: 575px;
+    height: 540px;
+    text-align: center;
+}
+
+#brickSmasherStartScreen {
+    width: 575px;
+    height: 540px;
+    z-index: 1;
+}
+
+#brickSmasherStartButton, #brickSmasherPlayAgainButton {
+    position: relative;
+    top: -120px;
+    z-index: 2;
 }
 
 #brickSmasher canvas {
