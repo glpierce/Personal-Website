@@ -11,7 +11,7 @@ const quoteArray = [`"Whoever fights monsters should see to it that in the proce
                     `"In every walk with nature one receives far more than he seeks."
                     - John Muir`,
                     `"All we have to decide is what to do with the time that is given us."
-                    - Gandlaf the Grey, JRR Tolkien`,
+                    - Gandalf the Grey, JRR Tolkien`,
                     `"I feel all thin, sort of stretched, if you know what I mean: like butter that has been scraped over too much bread."
                     - Bilbo Baggins, JRR Tolkien`,
                     `"Faithless is he that says farewell when the road darkens."
