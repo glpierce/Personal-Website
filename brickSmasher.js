@@ -19,6 +19,7 @@ function startGame() {
 
     /* Initializes variable controlling if the game has ended */
     let gameOver = false;
+    let victory = false;
 
     /* Score, lives, level & header initialization */
     const topMargin = 20;
@@ -279,18 +280,18 @@ function startGame() {
         if (gameOver == false) {
             if (checkLevelComplete()) {
                 level = level + 1;
-                setUpLevelParameters();
-                requestAnimationFrame(playGame);
+                if (level == 7) {
+                    victory = true;
+                    drawGameOver();
+                } else {
+                    setUpLevelParameters();
+                    requestAnimationFrame(playGame);
+                }
             } else {
                 requestAnimationFrame(playGame);
             }
         } else {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawScore();
-            drawLives()
-            drawTopBound();
             drawGameOver();
-            addPlayAgainButton();
         }
     }
 
@@ -591,16 +592,34 @@ function startGame() {
     
     /* Creates the game over screen */
     function drawGameOver() {
-        ctx.beginPath();
-        ctx.font = "bold 45px Arial";
-        ctx.fillStyle = "red";
-        ctx.fillText("GAME OVER", (canvas.width / 2) - 135, 200);
-        ctx.closePath();
-        ctx.beginPath();
-        ctx.font = "25px Arial";
-        ctx.fillStyle = "#0095DD";
-        ctx.fillText("Final Score: " + score, (canvas.width / 2) - 70, 250);
-        ctx.closePath();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawScore();
+        drawLives()
+        drawTopBound();
+        if (victory = false) {
+            ctx.beginPath();
+            ctx.font = "bold 45px Arial";
+            ctx.fillStyle = "red";
+            ctx.fillText("GAME OVER", (canvas.width / 2) - 135, 200);
+            ctx.closePath();
+            ctx.beginPath();
+            ctx.font = "25px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Final Score: " + score, (canvas.width / 2) - 70, 250);
+            ctx.closePath();
+        } else {
+            ctx.beginPath();
+            ctx.font = "bold 45px Arial";
+            ctx.fillStyle = "green";
+            ctx.fillText("VICTORY!", (canvas.width / 2) - 130, 200);
+            ctx.closePath();
+            ctx.beginPath();
+            ctx.font = "25px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Final Score: " + score, (canvas.width / 2) - 70, 250);
+            ctx.closePath();
+        }
+        addPlayAgainButton();
     }
 
     /* Creates and adds the play again button */
