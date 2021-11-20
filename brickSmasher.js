@@ -282,6 +282,7 @@ function startGame() {
                 level = level + 1;
                 if (level == 7) {
                     victory = true;
+                    level = 6;
                     drawGameOver();
                 } else {
                     setUpLevelParameters();
