@@ -44,17 +44,17 @@ function startGame() {
     function assignDY() {
         switch (level) {
             case 1:
-                return 2;
+                return -2;
             case 2:
-                return 2;
+                return -2;
             case 3:
-                return 3;
+                return -3;
             case 4:
-                return 3;
+                return -3;
             case 5:
-                return 3;
+                return -3;
             case 6:
-                return 3.5;
+                return -3.5;
         }
     }
 
@@ -452,7 +452,7 @@ function startGame() {
                     x = canvas.width/2;
                     y = canvas.height-30;
                     dx = randomDirection(2);
-                    dy = -2;
+                    dy = assignDY();
                     paddleX = (canvas.width-paddleWidth)/2;
                 }
             }
