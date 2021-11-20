@@ -30,21 +30,14 @@ function startGame() {
     const ballRadius = 10;
     let x = canvas.width/2;
     let y = canvas.height-30;
-    let dx = assignDX();
+    let dx = randomDirection(2);
     let dy = assignDY();
 
-    function assignDX() {
-        switch (level) {
-            case 1:
-                return randomDirection(2);
-            case 2:
-                return randomDirection(2);
-            case 3:
-                return randomDirection(2);
-            case 4:
-                return randomDirection(3);
-            case 5:
-                return randomDirection(3);
+    function randomDirection(num) {
+        if (Math.random() < 0.5) {
+            return num * -1;
+        } else {
+            return num;
         }
     }
 
@@ -60,23 +53,30 @@ function startGame() {
                 return 3;
             case 5:
                 return 3;
-        }
-    }
-
-    function randomDirection(num) {
-        if (Math.random() < 0.5) {
-            return num * -1;
-        } else {
-            return num;
+            case 6:
+                return 3.5;
         }
     }
 
     /* Assigns initial paddle parameters */
     const paddleHeight = 10;
-    const paddleWidth = canvas.width; /*75*/
+    let paddleWidth = 75;
     let paddleX = (canvas.width-paddleWidth) / 2;
+    let paddleColor = "#0095DD";
     let rightPressed = false;
     let leftPressed = false;
+
+    /* Assigns initial power up parameters */
+    let powerUpDropped = false;
+    const powerUpSize = 10;
+    let powerUps = [];
+
+    /* Assigns initial paddle gun parameters */
+    let paddleGun = false;
+    let shotCount = 0;
+    let activeShots = [];
+    const shotRadius = 5;
+    let shotSpeed = 2;
     
     /* Assigns initial brick parameters */
     let brickRowCount = getBrickRowCount();
@@ -93,6 +93,8 @@ function startGame() {
             return 2;
         } else if (level == 3 || level == 4 || level == 5) {
             return 5;
+        } else if (level == 6){
+            return 4;
         }
     }
     
@@ -101,7 +103,7 @@ function startGame() {
         for (c = 0; c < brickColumnCount; c++) {
             brickParameters[c] = [];
             for (r = 0; r < brickRowCount; r++) {
-                brickParameters[c][r] = {x: getBrickX(c), y: getBrickY(r), status: getStatus(c, r)};
+                brickParameters[c][r] = {x: getBrickX(c), y: getBrickY(r), status: getStatus(c, r), powerUpType: getPowerUpType(c, r)};
             }
         }
         return brickParameters;
@@ -151,6 +153,59 @@ function startGame() {
                 } else {
                     return 2;
                 }
+            case 6:
+                return 3;
+        }
+    }
+
+    function getPowerUpType(c, r) {
+        switch (level) {
+            case 1:
+                if (r == 1 && c == 3) {
+                    return 1;
+                } else if (r == 0 && c == 4) {
+                    return 2;
+                } else {
+                    return 0;
+                }
+            case 2:
+                if ((r == 1 && c == 3) || (r == 0 && c == 6)) {
+                    return 2;
+                } else {
+                    return 0;
+                }
+            case 3:
+                if (r == 3 && c == 3) {
+                    return 1;
+                } else if ((r == 4 && (c == 2 || c == 4)) || (r == 1 && c == 3)) {
+                    return 2;
+                } else {
+                    return 0;
+                }
+            case 4:
+                if ((r == 1 && (c == 4 || c == 2)) || (r == 3 && (c == 1 || c == 5))) {
+                    return 2;
+                } else if (r == 2 && c == 5) {
+                    return 3;
+                } else {
+                    return 0
+                }
+            case 5:
+                if ((r == 4 && (c == 2 || c == 4)) || (r == 1 && (c == 2 || c == 4))) {
+                    return 2;
+                } else if (r == 3 && c == 5) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            case 6:
+                if ((r == 3 && c == 3) || (r == 2 && (c == 2 || c == 4)) || (r == 1 && (c == 1 || c == 3 || c ==5)) || (r == 0 && (c == 0 || c == 2 || c == 4 || c == 6))) {
+                    return 2;
+                } else if (r == 2 && c == 3) {
+                    return 3;
+                } else {
+                    return 0;
+                }
         }
     }
 
@@ -164,7 +219,7 @@ function startGame() {
             rightPressed = true;
         } else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") {
             leftPressed = true;
-        }
+        } 
     }
     function keyUpHandler(e) {
         if( e.key == "Right" || e.key == "ArrowRight" || e.key == "d") {
@@ -172,6 +227,13 @@ function startGame() {
         }
         else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") {
             leftPressed = false;
+        } else if ((e.key == "w" || e.key == "ArrowUp" || e.key == "Up") && shotCount != 0 && paddleGun == true) {
+            addShot();
+            shotCount = shotCount - 1;
+            if (shotCount == 0) {
+                paddleGun = false;
+                paddleColor = "#0095DD";
+            }
         }
     }
 
@@ -193,9 +255,27 @@ function startGame() {
         drawLevel();
         drawTopBound();
         drawBricks();
-        collisionDetection();
+        if (powerUpDropped == true) {
+            drawPowerUps();
+        }
+        if (activeShots.length != 0) {
+            drawShots();
+        }
+        ballCollisionDetection();
+        if (powerUpDropped == true) {
+            powerUpsCollisionDetection();
+        }
+        if (activeShots.length != 0) {
+            shotsCollisionDetection();
+        }
         ballMovement();
         paddleMovement();
+        if (powerUpDropped == true) {
+            powerUpMovement();
+        }
+        if (activeShots.length != 0) {
+            shotsMovement();
+        }
         if (gameOver == false) {
             if (checkLevelComplete()) {
                 level = level + 1;
@@ -227,7 +307,7 @@ function startGame() {
     function drawPaddle() {
         ctx.beginPath();
         ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-        ctx.fillStyle = "#0095DD";
+        ctx.fillStyle = paddleColor;
         ctx.fill();
         ctx.closePath();
     }
@@ -272,7 +352,7 @@ function startGame() {
                 if (bricks[c][r].status > 0) {
                     ctx.beginPath();
                     ctx.rect(bricks[c][r].x, bricks[c][r].y, brickWidth, brickHeight);
-                    ctx.fillStyle = getColor();
+                    ctx.fillStyle = getBrickColor();
                     ctx.fill();
                     ctx.closePath();
                 }
@@ -281,7 +361,7 @@ function startGame() {
     }
 
     /* Assigns brick color */
-    function getColor() {
+    function getBrickColor() {
         switch (bricks[c][r].status) {
             case 1:
                 return "yellow";
@@ -292,8 +372,39 @@ function startGame() {
         }
     }
 
+    function drawPowerUps() {
+        for (i = 0; i < powerUps.length; i++) {
+            ctx.beginPath();
+            ctx.rect(powerUps[i][0], powerUps[i][1], powerUpSize, powerUpSize);
+            ctx.fillStyle = getPowerUpColor(i);
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
+    function getPowerUpColor(i) {
+        switch (powerUps[i][2]) {
+            case 1:
+                return "#0095DD";
+            case 2:
+                return "purple";
+            case 3:
+                return "green";
+        }
+    }
+
+    function drawShots() {
+        for (i = 0; i < activeShots.length; i++) {
+            ctx.beginPath();
+            ctx.arc(activeShots[i][0], activeShots[i][1], shotRadius, 0, Math.PI*2);
+            ctx.fillStyle = "purple";
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
     /* Detects collisions between the ball and the walls or bricks, causing ball to change direction and remove bricks if applicable */
-    function collisionDetection() {
+    function ballCollisionDetection() {
         for (c = 0; c < brickColumnCount; c++) {
             for (r = 0; r < brickRowCount; r++) {
                 let b = bricks[c][r];
@@ -304,6 +415,11 @@ function startGame() {
                         x = x + dx;
                         b.status = b.status - 1;
                         score++;
+                        if (b.powerUpType != 0) {
+                            addPowerUp(b.x, b.y, b.powerUpType);
+                            powerUpDropped = true;
+                            bricks[c][r].powerUpType = 0;
+                        }
                     }
                     if (((x - ballRadius <= b.x + brickWidth && x + ballRadius > b.x + brickWidth) || (x + ballRadius >= b.x && x - ballRadius < b.x)) && (y >= b.y && y <= b.y + brickHeight)) {
                         dx = -dx;
@@ -311,6 +427,11 @@ function startGame() {
                         y = y + dy;
                         b.status = b.status - 1;
                         score++;
+                        if (b.powerUpType != 0) {
+                            addPowerUp(b.x, b.y, b.powerUpType);
+                            powerUpDropped = true;
+                            bricks[c][r].powerUpType = 0;
+                        }
                     }
                 }
             }
@@ -330,10 +451,77 @@ function startGame() {
                 } else {
                     x = canvas.width/2;
                     y = canvas.height-30;
-                    dx = assignDX();
+                    dx = randomDirection(2);
                     dy = -2;
                     paddleX = (canvas.width-paddleWidth)/2;
                 }
+            }
+        }
+    }
+
+    function addPowerUp(brickX, brickY, powerUpType) {
+        powerUps.push([brickX + (brickWidth / 2) - (powerUpSize / 2), brickY + brickHeight, powerUpType]);
+    }
+
+    function addShot() {
+        activeShots.push([paddleX + (paddleWidth / 2), canvas.height + paddleHeight + shotRadius]);
+    }
+
+    function powerUpsCollisionDetection() {
+        for (i = powerUps.length - 1; i >= 0; i--) {
+            if (powerUps[i][1] + powerUpSize >= canvas.height -  paddleHeight && (powerUps[i][0] + powerUpSize >= paddleX && powerUps[i][0] <= paddleX + paddleWidth)) {
+                applyPowerUp(i);
+                powerUps.splice(i, 1);
+                if (powerUps.length == 0) {
+                    powerUpDropped = false;
+                }
+            } else if (powerUps[i][1] >= canvas.height) {
+                powerUps.splice(i, 1);
+                if (powerUps.length == 0) {
+                    powerUpDropped = false;
+                }
+            }
+        }
+    }
+
+    function applyPowerUp(i) {
+        switch (powerUps[i][2]) {
+            case 1:
+                paddleWidth = 115;
+                break;
+            case 2:
+                paddleGun = true;
+                shotCount = shotCount + 5;
+                paddleColor = "purple";
+                break;
+            case 3:
+                lives = lives + 1;
+                break;
+        }
+    }
+
+    function shotsCollisionDetection() {
+        for (i = activeShots.length - 1; i >= 0; i--) {
+            let collisionFound = false;
+            for (c = 0; c < brickColumnCount; c++) {
+                for (r = 0; r < brickRowCount; r++) {
+                    let b = bricks[c][r];
+                    if( b.status > 0) {
+                        if (activeShots[i] != undefined && activeShots[i][1] - shotRadius <= b.y + brickHeight && ((activeShots[i][0] - shotRadius < b.x + brickWidth && activeShots[i][0] - shotRadius >= b.x) || (activeShots[i][0] + shotRadius > b.x && activeShots[i][0] + shotRadius <= b.x + brickWidth))) {
+                            b.status = b.status - 1;
+                            score++;
+                            collisionFound = true;
+                            if (b.powerUpType != 0) {
+                                addPowerUp(b.x, b.y, b.powerUpType);
+                                powerUpDropped = true;
+                                bricks[c][r].powerUpType = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            if (collisionFound || activeShots[i][1] <= topMargin) {
+                activeShots.splice(i, 1);
             }
         }
     }
@@ -360,6 +548,18 @@ function startGame() {
         }
     }
 
+    function powerUpMovement() {
+        for (i = 0; i < powerUps.length; i++) {
+            powerUps[i][1] = powerUps[i][1] + 1;
+        }
+    }
+
+    function shotsMovement() {
+        for (i = 0; i < activeShots.length; i++) {
+            activeShots[i][1] = activeShots[i][1] - shotSpeed;
+        }
+    }
+
     function checkLevelComplete() {
         for (c = 0; c < brickColumnCount; c++) {
             for (r = 0; r < brickRowCount; r++) {
@@ -374,11 +574,19 @@ function startGame() {
     function setUpLevelParameters() {
         x = canvas.width/2;
         y = canvas.height-30;
-        paddleX = (canvas.width-paddleWidth)/2
-        dx = assignDX();
+        dx = randomDirection(2);
         dy = assignDY();
+        paddleX = (canvas.width-paddleWidth)/2
+        paddleWidth = 75;
+        paddleColor = "#0095DD";
         brickRowCount = getBrickRowCount();
         bricks = getBrickParameters();
+        powerUpDropped = false;
+        powerUps = [];
+        paddleGun = false;
+        shotCount = 0;
+        shotLoaded = false;
+        activeShots = [];
     }
     
     /* Creates the game over screen */
