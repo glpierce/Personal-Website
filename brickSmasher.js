@@ -284,6 +284,7 @@ function startGame() {
                     victory = true;
                     drawGameOver();
                 } else {
+                    level = level + 1;
                     setUpLevelParameters();
                     requestAnimationFrame(playGame);
                 }
