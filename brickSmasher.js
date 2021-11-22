@@ -26,6 +26,7 @@ function startGame() {
     let score = 0;
     let lives = 3;
     let level = 1;
+    const highestLevel = 6;
 
     /* Assigns initial ball parameters */
     const ballRadius = 10;
@@ -279,10 +280,8 @@ function startGame() {
         }
         if (gameOver == false) {
             if (checkLevelComplete()) {
-                level = level + 1;
-                if (level == 7) {
+                if (level == highestLevel) {
                     victory = true;
-                    level = 6;
                     drawGameOver();
                 } else {
                     setUpLevelParameters();
@@ -597,11 +596,11 @@ function startGame() {
         drawScore();
         drawLives()
         drawTopBound();
-        if (victory = false) {
+        if (victory == false) {
             ctx.beginPath();
             ctx.font = "bold 45px Arial";
             ctx.fillStyle = "red";
-            ctx.fillText("GAME OVER", (canvas.width / 2) - 135, 200);
+            ctx.fillText("GAME OVER", (canvas.width / 2) - 138, 200);
             ctx.closePath();
             ctx.beginPath();
             ctx.font = "25px Arial";
@@ -612,7 +611,7 @@ function startGame() {
             ctx.beginPath();
             ctx.font = "bold 45px Arial";
             ctx.fillStyle = "green";
-            ctx.fillText("VICTORY!", (canvas.width / 2) - 130, 200);
+            ctx.fillText("VICTORY!", (canvas.width / 2) - 100, 200);
             ctx.closePath();
             ctx.beginPath();
             ctx.font = "25px Arial";
