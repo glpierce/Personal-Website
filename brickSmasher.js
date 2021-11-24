@@ -1,8 +1,7 @@
 function startGame() {
     /**/
-    /* Game Setup */
+    /* Game & Level Setup */
     /**/ 
-
     /* Removes start screen and start button if present */
     if (!!document.querySelector("#startScreenContainer")) {
         document.querySelector("#startScreenContainer").remove();
@@ -34,7 +33,8 @@ function startGame() {
     let y = canvas.height-30;
     let dx = randomDirection(2);
     let dy = assignDY();
-
+     
+    /* Determines if ball will travel left or right upon spawn */
     function randomDirection(num) {
         if (Math.random() < 0.5) {
             return num * -1;
@@ -43,6 +43,7 @@ function startGame() {
         }
     }
 
+    /* Assigns dy (up down ball speed) depending on the level */
     function assignDY() {
         switch (level) {
             case 1:
@@ -87,7 +88,8 @@ function startGame() {
     const brickWidth = (canvas.width - ((brickColumnCount + 1) * brickPadding)) / brickColumnCount;
     const brickHeight = 20;
     let bricks = getBrickParameters();
-
+    
+    /* Assigns the number of rows of bricks depending on the level */
     function getBrickRowCount() {
         if (level == 1){
             return 2;
@@ -100,6 +102,7 @@ function startGame() {
         }
     }
     
+    /* Constructs the array of bricks and their properties depending on the level */
     function getBrickParameters() {
         let brickParameters = [];
         for (c = 0; c < brickColumnCount; c++) {
@@ -111,14 +114,17 @@ function startGame() {
         return brickParameters;
     }
 
+    /* Returns a brick's x position depending on its column */
     function getBrickX(c) {
         return (c * (brickWidth + brickPadding) + brickPadding);
     }
 
+    /* Returns a brick's y position depending on its row */
     function getBrickY(r) {
         return (r * (brickHeight + brickPadding) + brickPadding + topMargin);
     }
 
+    /* Returns a brick's status (i.e. how many hits to remove brick) depending on the level */
     function getStatus(c, r) {
         switch (level) {
             case 1:
@@ -160,6 +166,7 @@ function startGame() {
         }
     }
 
+    /* Returns a brick's powerup drop or lack thereof depending on the level */
     function getPowerUpType(c, r) {
         switch (level) {
             case 1:
@@ -243,41 +250,15 @@ function startGame() {
     /**/
     /* Play Game */
     /**/
-
-    /* Starts game */
+    /* Starts gameplay */
     playGame();
 
     /* Recursive function which continuously updates and allows the game to run */
     function playGame() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBall();
-        drawPaddle();
-        drawScore();
-        drawLives();
-        drawLevel();
-        drawTopBound();
-        drawBricks();
-        if (powerUpDropped == true) {
-            drawPowerUps();
-        }
-        if (activeShots.length != 0) {
-            drawShots();
-        }
-        ballCollisionDetection();
-        if (powerUpDropped == true) {
-            powerUpsCollisionDetection();
-        }
-        if (activeShots.length != 0) {
-            shotsCollisionDetection();
-        }
-        ballMovement();
-        paddleMovement();
-        if (powerUpDropped == true) {
-            powerUpMovement();
-        }
-        if (activeShots.length != 0) {
-            shotsMovement();
-        }
+        drawElements();
+        collisionDetection();
+        elementMovement();
         if (gameOver == false) {
             if (checkLevelComplete()) {
                 if (level == highestLevel) {
@@ -293,6 +274,23 @@ function startGame() {
             }
         } else {
             drawGameOver();
+        }
+    }
+
+    /* Executes draw functions */
+    function drawElements() {
+        drawBall();
+        drawPaddle();
+        drawScore();
+        drawLives();
+        drawLevel();
+        drawTopBound();
+        drawBricks();
+        if (powerUpDropped == true) {
+            drawPowerUps();
+        }
+        if (activeShots.length != 0) {
+            drawShots();
         }
     }
 
@@ -332,6 +330,7 @@ function startGame() {
         ctx.closePath();
     }
 
+    /* Draws level number on canvas */
     function drawLevel() {
         ctx.beginPath();
         ctx.font = "bold 16px Arial";
@@ -374,6 +373,7 @@ function startGame() {
         }
     }
 
+    /* Draws falling powerups on canvas given parameters */
     function drawPowerUps() {
         for (i = 0; i < powerUps.length; i++) {
             ctx.beginPath();
@@ -384,6 +384,7 @@ function startGame() {
         }
     }
 
+    /* Returns powerup color given powerup type */
     function getPowerUpColor(i) {
         switch (powerUps[i][2]) {
             case 1:
@@ -395,6 +396,7 @@ function startGame() {
         }
     }
 
+    /* Draws fired shots */
     function drawShots() {
         for (i = 0; i < activeShots.length; i++) {
             ctx.beginPath();
@@ -402,6 +404,17 @@ function startGame() {
             ctx.fillStyle = "purple";
             ctx.fill();
             ctx.closePath();
+        }
+    }
+
+    /* Executes collision detection functions */
+    function collisionDetection() {
+        ballCollisionDetection();
+        if (powerUpDropped == true) {
+            powerUpsCollisionDetection();
+        }
+        if (activeShots.length != 0) {
+            shotsCollisionDetection();
         }
     }
 
@@ -461,14 +474,17 @@ function startGame() {
         }
     }
 
+    /* Adds powerup to array of falling powerups */
     function addPowerUp(brickX, brickY, powerUpType) {
         powerUps.push([brickX + (brickWidth / 2) - (powerUpSize / 2), brickY + brickHeight, powerUpType]);
     }
 
+    /* Adds shot to array of fired shots */
     function addShot() {
         activeShots.push([paddleX + (paddleWidth / 2), canvas.height + paddleHeight + shotRadius]);
     }
 
+    /* Determines if falling powerups have collided with paddle or floor */
     function powerUpsCollisionDetection() {
         for (i = powerUps.length - 1; i >= 0; i--) {
             if (powerUps[i][1] + powerUpSize >= canvas.height -  paddleHeight && (powerUps[i][0] + powerUpSize >= paddleX && powerUps[i][0] <= paddleX + paddleWidth)) {
@@ -486,6 +502,7 @@ function startGame() {
         }
     }
 
+    /* Activates the powerup which impacted the paddle */
     function applyPowerUp(i) {
         switch (powerUps[i][2]) {
             case 1:
@@ -502,6 +519,7 @@ function startGame() {
         }
     }
 
+    /* Determines if a fired shot has impacted a brick or the ceiling and either decrements brick status & removes shot or removes shot respectively */
     function shotsCollisionDetection() {
         for (i = activeShots.length - 1; i >= 0; i--) {
             let collisionFound = false;
@@ -528,6 +546,18 @@ function startGame() {
         }
     }
 
+    /* Executes movement calculation functions */
+    function elementMovement() {
+        ballMovement();
+        paddleMovement();
+        if (powerUpDropped == true) {
+            powerUpMovement();
+        }
+        if (activeShots.length != 0) {
+            shotsMovement();
+        }
+    }
+
     /* Moves the ball each frame */
     function ballMovement() {
         x += dx;
@@ -550,18 +580,21 @@ function startGame() {
         }
     }
 
+    /* Moves falling powerups each frame */
     function powerUpMovement() {
         for (i = 0; i < powerUps.length; i++) {
             powerUps[i][1] = powerUps[i][1] + 1;
         }
     }
 
+    /* Moves fired shots each frame */
     function shotsMovement() {
         for (i = 0; i < activeShots.length; i++) {
             activeShots[i][1] = activeShots[i][1] - shotSpeed;
         }
     }
 
+    /* Checks if the current level has been completed */
     function checkLevelComplete() {
         for (c = 0; c < brickColumnCount; c++) {
             for (r = 0; r < brickRowCount; r++) {
@@ -573,6 +606,7 @@ function startGame() {
         return true;
     }
 
+    /* Sets up game parameters for each new level */
     function setUpLevelParameters() {
         x = canvas.width/2;
         y = canvas.height-30;
@@ -591,7 +625,7 @@ function startGame() {
         activeShots = [];
     }
     
-    /* Creates the game over screen */
+    /* Creates the victory or game over screen */
     function drawGameOver() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawScore();
